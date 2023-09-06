@@ -66,24 +66,27 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.herpestes.noteapp.database.NoteEntity
 import com.herpestes.noteapp.ui.theme.ubuntu
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class
 )
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
-
     val notes by viewModel.notes.collectAsState()
     val searchedNotes by viewModel.searchedNotes.collectAsState()
+
 
     val (dialogOpen, setDialogOpen) = remember {
         mutableStateOf(false)
     }
+
     if (dialogOpen) {
         val controller = rememberColorPickerController()
         controller.setWheelRadius(7.dp)
         val (note, setNote) = remember {
             mutableStateOf("")
         }
+
         val color by animateColorAsState(targetValue = controller.selectedColor.value)
 
         Dialog(onDismissRequest = { setDialogOpen(false) }) {
@@ -109,20 +112,19 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                         Text(text = "Note")
                     },
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedLabelColor = Color.White,
                         focusedBorderColor = Color.White,
+                        focusedLabelColor = Color.White,
                         focusedTextColor = Color.White
                     )
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = "Note color: ")
+                Text(text = "Note Color:", color = Color.White)
                 Spacer(modifier = Modifier.height(8.dp))
                 HsvColorPicker(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp),
-                    controller = controller,
-                    initialColor = Color(0xff2dffc0)
+                        .height(200.dp), controller = controller,
+                    initialColor = Color(0xff1dffc0)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 AlphaSlider(
@@ -142,7 +144,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                     borderRadius = 6.dp,
                     wheelRadius = 7.dp
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 Button(
                     onClick = {
                         if (note.isNotEmpty()) {
@@ -158,17 +160,13 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                     shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        //containerColor = color
+                        containerColor = color
                     )
                 ) {
                     Text(text = "Add Note", color = Color.White, fontFamily = ubuntu)
-
                 }
-
-
             }
         }
-
     }
 
     Scaffold(
@@ -176,13 +174,12 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             FloatingActionButton(
                 onClick = { setDialogOpen(true) },
                 contentColor = Color.White,
-                //containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = MaterialTheme.colorScheme.secondary
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
             }
         },
-        contentColor = MaterialTheme.colorScheme.primary
-
+        containerColor = MaterialTheme.colorScheme.primary
     ) { paddings ->
         Column(
             modifier = Modifier
@@ -201,8 +198,9 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                 mutableStateOf("")
             }
             LaunchedEffect(searchQuery) {
-                viewModel.searchedNotes(searchQuery)
+                viewModel.searchNotes(searchQuery)
             }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -210,14 +208,14 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             ) {
                 AnimatedVisibility(
                     visible = !searchOpen,
-                    enter = fadeIn(tween(500)) + scaleIn(tween(500)),
-                    exit = fadeOut(tween(500)) + scaleOut(tween(500))
+                    enter = fadeIn(tween(500)) + expandHorizontally(tween(500)),
+                    exit = fadeOut(tween(500)) + shrinkHorizontally(tween(500))
                 ) {
                     Text(
-                        text = "My notes",
+                        text = "My Notes",
+                        color = Color.White,
                         fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 AnimatedVisibility(
@@ -226,47 +224,68 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                         .weight(1f)
                         .padding(end = 8.dp),
                     visible = searchOpen,
-                    enter = fadeIn(tween(500)) + scaleIn(tween(500)),
-                    exit = fadeOut(tween(500)) + scaleOut(tween(500))
+                    enter = fadeIn(tween(500)) + expandHorizontally(tween(500)),
+                    exit = fadeOut(tween(500)) + shrinkHorizontally(tween(500))
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(androidx.compose.material3.MaterialTheme.colorScheme.secondary)
+                            .background(MaterialTheme.colorScheme.secondary)
                             .height(50.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        TextField(value = searchQuery,
-                            onValueChange = {
-                                setSearchQuery(it)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = {
-                                Text(text = "Search")
-                            },
-                            colors = androidx.compose.material3.TextFieldDefaults.textFieldColors(
-                                containerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                focusedTextColor = Color.Transparent,
-                            )
+                        TextField(value = searchQuery, onValueChange = {
+                            setSearchQuery(it)
+                        }, modifier = Modifier.fillMaxWidth(), placeholder = {
+                            Text(text = "Search")
+                        }, colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            focusedTextColor = Color.White
+                        )
                         )
                     }
-
-
                 }
-
-
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .clickable {
+                            setSearchOpen(!searchOpen)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row {
+                        AnimatedVisibility(
+                            visible = !searchOpen,
+                            enter = scaleIn(tween(500)),
+                            exit = scaleOut(tween(500))
+                        ) {
+                            Icon(Icons.Default.Search, contentDescription = null)
+                        }
+                    }
+                    Row {
+                        AnimatedVisibility(
+                            visible = searchOpen,
+                            enter = scaleIn(tween(500)),
+                            exit = scaleOut(tween(500))
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = null)
+                        }
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(18.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(androidx.compose.material3.MaterialTheme.colorScheme.secondary)
+                    .background(MaterialTheme.colorScheme.secondary)
             )
             Spacer(modifier = Modifier.height(28.dp))
             LazyColumn(
@@ -285,15 +304,15 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                             tween(500)
                         )
                         .pointerInput(Unit) {
-                            detectTapGestures(onLongPress = { viewModel.deleteNote(note) })
-                        }) {
+                            detectTapGestures(onLongPress = {
+                                viewModel.deleteNote(note)
+                            })
+                        }
+                    ) {
                         Text(text = note.note, color = Color.White)
                     }
                 }
             }
-
         }
-
     }
-
 }
